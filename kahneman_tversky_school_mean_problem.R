@@ -4,6 +4,7 @@
 # Feel free to use or modify for educational purposes! 
 # Please acknowledge yours truly as the source of this code :)
 
+#required packages
 library(tidyr)
 library(dplyr)
 library(purrr)
@@ -12,20 +13,25 @@ library(scales)
 library(beepr)
 library(hms)
 
+#stack exchange summary of the problem
 browseURL("https://math.stackexchange.com/questions/2129646/bayess-theorem-from-tversky-and-kahneman-in-michael-lewiss-the-undoing-project")
 
+#problem statement
 cat("The mean IQ of the population of eighth graders in a city is known to be 100. 
 You have selected a random sample of 50 children for a study of educational achievement. 
 The first child tested has an IQ of 150. 
 What do you expect the mean IQ to be for the whole sample?")
 
+#create population 
 {set.seed(1337)
   distro <- rnorm(100000000, 100, 15)
 }
 
+#transform into tibble
 data <- tibble(value = distro) %>% 
   mutate(n = row_number()) 
 
+#draw k samples of 50
 {
   samples <- list()
   k <- 1000
@@ -50,6 +56,7 @@ data <- tibble(value = distro) %>%
   }
   }
 
+#select samples that contain an IQ of ~150
 samples150 <- samples %>% 
   tibble(sample = .) %>% 
   mutate(values = map(sample, ~{pull(., value)})) %>% 
@@ -59,8 +66,6 @@ samples150 <- samples %>%
   
   
 means <- samples150 %>% 
-  # tibble(sample = .) %>% 
-  # mutate(values = map(sample, ~{pull(., value)})) %>% 
   mutate(mean = map(values, ~(mean(.)))) %>% 
   select(mean) %>% 
   unnest(cols="mean")
@@ -70,6 +75,7 @@ means %>%
   mutate(mean = mean %>% round(0)) %>%  
   count(mean)
 
+#bar chart
 means %>% 
   mutate(mean = mean %>% round(0)) %>%  
   count(mean) %>% 
